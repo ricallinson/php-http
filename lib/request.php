@@ -130,7 +130,7 @@ class Request {
         return isset($_SERVER[$key]) ? $_SERVER[$key] : null;
     }
 
-    public function cookies($name) {
+    public function cookie($name) {
         $key = strtolower($name);
         if (!isset($this->cookies[$key])) {
             return null;

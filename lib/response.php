@@ -142,7 +142,6 @@ class Response {
         $this->statusCode = $status;
         $this->set("Content-Length", count($body));
         $this->end($head ? null : $body);
-        exit();
     }
 
     public function location($url) {
@@ -187,6 +186,8 @@ class Response {
         $this->headersSent = true;
 
         echo($data);
+
+        exit();
     }
 
     public function send($body, $status = null) {
