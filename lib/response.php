@@ -110,7 +110,7 @@ class Response {
         setcookie($name, "", time() - 3600);
     }
 
-    public function redirect($url, $status = null) {
+    public function redirect($url = "", $status = null) {
 
         $app = null;
         $req = $this->request;
@@ -118,6 +118,10 @@ class Response {
         $status = $status ? $status : 302;
         $statusCodes = $this->STATUS_CODES;
         $body = "";
+
+        if ($url === "") {
+            $url = $_SERVER["REQUEST_URI"];
+        }
 
         // Set location header
         $this->location($url);
