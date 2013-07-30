@@ -117,8 +117,10 @@ class Request {
             $this->query = $_REQUEST;
         }
 
-        foreach (getallheaders() as $key => $value) {
-            $this->headers[strtolower($key)] = $value;
+        if (function_exists("getallheaders")) {
+            foreach (getallheaders() as $key => $value) {
+                $this->headers[strtolower($key)] = $value;
+            }
         }
 
         $this->xhr = $this->get('X-Requested-With') ? 'xmlhttprequest' === $this.get('X-Requested-With').toLowerCase() : false;
@@ -128,8 +130,20 @@ class Request {
         return isset($_SERVER[$key]) ? $_SERVER[$key] : null;
     }
 
+    public function cookies($name) {
+        $key = strtolower($name);
+        if (!isset($this->cookies[$key])) {
+            return null;
+        }
+        return $this->cookies[$key];
+    }
+
     public function param($name) {
-        //
+        $key = strtolower($name);
+        if (!isset($this->query[$key])) {
+            return null;
+        }
+        return $this->query[$key];
     }
 
     public function get($field) {
@@ -154,6 +168,18 @@ class Request {
 
     public function acceptsLanguage($lang) {
         //
+    }
+
+    public function cfg($name, $value=null) {
+        $key = strtolower($name);
+        if ($value) {
+            $this->cfg[$key] = $value;
+        } else {
+            if (!isset($this->cfg[$key])) {
+                return null;
+            }
+            return $this->cfg[$key];
+        }
     }
 }
 

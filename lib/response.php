@@ -103,11 +103,11 @@ class Response {
     }
 
     public function cookie($name, $value, $options = null) {
-        //
+        setcookie($name, $value, 0);
     }
 
     public function clearCookie($name, $options = null) {
-        //
+        setcookie($name, "", time() - 3600);
     }
 
     public function redirect($url, $status = null) {
