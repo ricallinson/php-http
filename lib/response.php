@@ -142,6 +142,7 @@ class Response {
         $this->statusCode = $status;
         $this->set("Content-Length", count($body));
         $this->end($head ? null : $body);
+        exit();
     }
 
     public function location($url) {
