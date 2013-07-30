@@ -126,7 +126,7 @@ class Request {
         $this->xhr = $this->get('X-Requested-With') ? 'xmlhttprequest' === $this.get('X-Requested-With').toLowerCase() : false;
     }
 
-    private function getServerVar($key) {
+    public function getServerVar($key) {
         return isset($_SERVER[$key]) ? $_SERVER[$key] : null;
     }
 
