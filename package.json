@@ -10,8 +10,7 @@
         "php": ">= 5.4.0"
     },
     "dependencies" : {
-        "php-require": "*",
-        "php-path": "git://github.com/ricallinson/php-path.git#master"
+        "php-require": "git://github.com/ricallinson/php-require.git#master"
     },
     "devDependencies" : {
         "php-tester": "git://github.com/ricallinson/php-tester.git#master"
