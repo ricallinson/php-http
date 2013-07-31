@@ -331,11 +331,7 @@ class Response {
         //
     }
 
-    public function render($view, $data = null, $callback = null) {
-
-        global $require, $__dirname;
-
-        $filename = $require("php-path")->join($__dirname, $view);
+    public function render($filename, $data = null, $callback = null) {
 
         if (!$callback) {
             $callback = function ($error, $string) {
