@@ -333,9 +333,9 @@ class Response {
 
     public function render($view, $data = null, $callback = null) {
 
-        global $__dirname;
+        global $require, $__dirname;
 
-        $filename = \php_require\Module::resolve($__dirname, $view);
+        $filename = $require("php-path")->join($__dirname, $view);
 
         if (!$callback) {
             $callback = function ($error, $string) {
