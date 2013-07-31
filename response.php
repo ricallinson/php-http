@@ -74,6 +74,8 @@ class Response {
 
     public $renderer = array();
 
+    public $request = null;
+
     public function __construct() {
         //
     }
@@ -356,3 +358,6 @@ class Response {
 */
 
 $module->exports = new Response();
+
+$module->exports->request = $require("./request");
+
