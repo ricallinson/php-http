@@ -102,10 +102,10 @@ describe("php-http/request", function () {
         });
 
         it("should return [baz]", function () {
-            $request = new Request();
             function getallheaders() {
                 return array("bar" => "baz");
             }
+            $request = new Request();
             assert($request->get("bar") === "baz");
         });
     });

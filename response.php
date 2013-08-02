@@ -165,7 +165,8 @@ class Response {
         if (strpos($url, "://") === false && strpos($url, "//") !== 0) {
             // relative to path
             if ($url[0] === ".") {
-                $path = explode($req->originalUrl("?"))[0];
+                $path = explode($req->originalUrl("?"));
+                $path = $path[0];
                 $url = $path . ($path[count($path) - 1] === "/" ? "" : "/") . $url;
                 // relative to mount-point
             } else if ($url[0] !== "/") {
