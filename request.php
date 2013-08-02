@@ -101,11 +101,15 @@ class Request {
 
         $this->ip = $this->getServerVar("SERVER_ADDR");
 
-        $this->path = rtrim(explode("?", $this->originalUrl)[0], "/");
+        $urlparts = explode("?", $this->originalUrl);
+
+        $this->path = rtrim($urlparts[0], "/");
 
         $this->host = $this->getServerVar("SERVER_NAME");
 
-        $this->protocol = strtolower(explode("/", $this->getServerVar("SERVER_PROTOCOL"))[0]);
+        $protocolParts = explode("/", $this->getServerVar("SERVER_PROTOCOL"));
+
+        $this->protocol = strtolower($protocolParts[0]);
 
         $this->secure = $this->protocol === "https";
 
