@@ -5,7 +5,7 @@ class Request {
 
     /**/
 
-    public $headers = null;
+    public $headers = array();
 
     /**/
 
