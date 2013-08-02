@@ -114,8 +114,15 @@ describe("php-http/request", function () {
 
         it("should return [null]", function () {
             $request = new Request();
-            $result = $request->accepts(array("type"));
-            assert($result === "type");
+            $result = $request->accepts(array("text"));
+            assert($result === null);
+        });
+
+        it("should return [text]", function () {
+            $request = new Request();
+            $request->accepted = array("text", "html");
+            $result = $request->accepts(array("text", "html"));
+            assert($result === "text");
         });
     });
 

@@ -89,7 +89,7 @@ class Request {
 
         $this->originalUrl = $this->getServerVar("REQUEST_URI", "/");
 
-        $this->accepted = $this->getServerVar("HTTP_ACCEPT");
+        $this->accepted = explode(",", $this->getServerVar("HTTP_ACCEPT"));
 
         $this->acceptedCharsets = $this->getServerVar("HTTP_ACCEPT_CHARSET");
 
@@ -159,7 +159,14 @@ class Request {
     }
 
     public function accepts($types) {
-        return $types[0];
+
+        foreach ($this->accepted as $type) {
+            if (in_array($type, $types)) {
+                return $type;
+            }
+        }
+
+        return null;
     }
 
     public function is($type) {

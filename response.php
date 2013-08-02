@@ -61,7 +61,9 @@ class Response {
         510 => "Not Extended",               // RFC 2774
         511 => "Network Authentication Required" // RFC 6585
     );
-        
+    
+    private $pathlib = null;
+
     private $testing = false;
 
     private $headersSent = false;
@@ -80,6 +82,7 @@ class Response {
 
     public function __construct($testing = false) {
         $this->testing = $testing;
+        $this->pathlib = new \php_require\php_path\Path();
     }
 
     public function status($code) {
@@ -126,13 +129,13 @@ class Response {
 
         $app = null;
         $req = $this->request;
-        $head = "HEAD" == $req->method;
+        $head = "HEAD" === $req->method;
         $status = $status ? $status : 302;
         $statusCodes = $this->STATUS_CODES;
         $body = "";
 
         if ($url === "") {
-            $url = $_SERVER["REQUEST_URI"];
+            $url = $req->getServerVar("REQUEST_URI", "/");
         }
 
         // Set location header
@@ -141,12 +144,12 @@ class Response {
 
         // Support text/{plain,html} by default
         $this->format(array(
-            "text" => function () use (&$body, $url, $status, $statusCodes) {
+            "text/plain" => function () use (&$body, $url, $status, $statusCodes) {
                 $body = $statusCodes[$status] . ". Redirecting to " . $url;
             },
 
-            "html" => function () use (&$body, $url, $status, $statusCodes) {
-                $body = "<p>" + $statusCodes[$status] + ". Redirecting to <a href=\"" . $url . "\">" . $url . "</a></p>";
+            "text/html" => function () use (&$body, $url, $status, $statusCodes) {
+                $body = "<p>" . $statusCodes[$status] . ". Redirecting to <a href=\"" . $url . "\">" . $url . "</a></p>";
             },
 
             "default" => function () use (&$body) {
@@ -166,23 +169,19 @@ class Response {
 
     public function location($url) {
 
-        // $app = null;
         $req = $this->request;
 
-        // setup redirect map
-        // $map = array("back" => $req->get("Referrer") ? $req->get("Referrer") : "/");
+        // Find url in a map (to be added later)
+        // $url = isset($url) ? $this->mapping[$url] : $url;
 
-        // perform redirect
-        // $url = isset($map[$url]) ? $map[$url] : $url;
-
-        // relative
-        if (strpos($url, "://") === false) {
-            // relative to path
-            if (strpos($url, "./") === 0) {
+        // relative to path
+        if (strpos($url, "://") === false && $url[0] !== "/") {
+            if ($url[0] === ".") {
                 $pathParts = explode("?", $req->originalUrl);
                 $path = $pathParts[0];
-                $url = $path . substr($url, 2);
-            // relative to mount-point
+                $url = $this->pathlib->join($path, $url);
+            } else {
+                $url = $req->originalUrl . $url;
             }
         }
 
@@ -191,7 +190,7 @@ class Response {
         return $this;
     }
 
-    public function end($data, $encoding = null) {
+    public function end($data = "", $encoding = null) {
 
         if ($this->headersSent) {
             throw new \Exception("Cannot call Response.end() more than once.");
@@ -214,14 +213,15 @@ class Response {
         exit();
     }
 
-    public function send($body, $status = null) {
+    public function send($body = "", $status = null) {
 
         $req = $this->request;
-        $head = "HEAD" == $req->method;
+        $head = "HEAD" === $req->method;
         $len = 0;
 
         switch (gettype($body)) {
             case "integer":
+                // If we have a content type do nothing, otherwise use type "text"
                 $this->get("Content-Type") ? null : $this->type("txt");
                 $this->statusCode = $body;
                 $body = $this->STATUS_CODES[$body];
@@ -257,9 +257,9 @@ class Response {
 
         // strip irrelevant headers
         if ($this->statusCode === 204 || $this->statusCode === 304) {
-            $this.removeHeader("Content-Type");
-            $this.removeHeader("Content-Length");
-            $this.removeHeader("Transfer-Encoding");
+            $this->removeHeader("Content-Type");
+            $this->removeHeader("Content-Length");
+            $this->removeHeader("Transfer-Encoding");
             $body = "";
         }
 
@@ -268,36 +268,30 @@ class Response {
         return $this;
     }
 
-    public function json($body, $status = null) {
+    public function json($array, $status = null) {
 
         // content-type
         $this->get("Content-Type") ? null : $this->set("Content-Type", "application/json");
 
-        return $this->send(json_encode($body), $status);
+        return $this->send(json_encode($array), $status);
     }
 
-    public function jsonp($body, $status = null) {
+    public function jsonp($array, $status = null) {
         
-        $body = json_encode($body);
+        $body = json_encode($array);
         $body = str_replace("\u2028", "\\u2028", $body);
         $body = str_replace("\u2029", "\\u2029", $body);
 
+        // get callback name
         $callback = isset($this->request->query["jsonp"]) ? $this->request->query["jsonp"] : "callback";
 
         // content-type
+        $this->set("Content-Type", "text/javascript");
         $this->charset = $this->charset ? $this->charset : "utf-8";
-        $this->set("Content-Type", "application/json");
 
-        // jsonp
-        if ($callback) {
-            if (gettype($callback) === "array") {
-                $callback = $callback[0];
-            }
-            $this->set("Content-Type", "text/javascript");
-            
-            $cb = str_replace("/[^\[\]\w$.]/g", "", $callback);
-            $body = $cb . " && " . $cb . "(" . $body . ");";
-        }
+        // cleanup the callback name
+        $cb = str_replace("/[^\[\]\w$.]/g", "", $callback);
+        $body = $cb . " && " . $cb . "(" . $body . ");";
 
         return $this->send($body);
     }
@@ -322,16 +316,24 @@ class Response {
         $key = $req->accepts($keys);
 
         $this->set('Vary', 'Accept');
-
+// echo "\n\n>> 1 [".$key."](" . count($array) . ")";
         if ($key) {
+            // use the found type
             $this->set('Content-Type', $key);
-            $array[$key]();
-        } else if ($fn) {
+            $fn = $array[$key];
             $fn();
-        } else {
-            // TODO: Deal with errors
+// echo ">> 2";
+        } else if ($fn) {
+            // use default
+            $fn();
+// echo ">> 3";
+        } else if (isset($array[$keys[count($keys) - 1]])) {
+            // use the last item in the array
+            $fn = $array[$keys[count($keys) - 1]];
+            $fn();
+// echo ">> 4";
         }
-
+// echo ">> 5\n\n";
         return $this;
     }
 
