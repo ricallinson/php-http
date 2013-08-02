@@ -342,8 +342,8 @@ class Response {
             };
         }
 
-        $type = "." . explode(".", $filename, 2);
-        $type = $type[1];
+        $type = explode(".", $filename, 2);
+        $type = "." . $type[1];
 
         if (!isset($this->renderer[$type])) {
             throw new \Exception("Renderer for type [" . $type . "] not set");
