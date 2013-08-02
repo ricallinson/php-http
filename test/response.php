@@ -154,6 +154,19 @@ describe("php-http/response", function () {
             assert($response->get("Content-Length") === 58);
             assert($result === "<p>Moved Temporarily. Redirecting to <a href=\"/\">/</a></p>");
         });
+
+        it("should return an empty string []", function () {
+            $response = new Response(true);
+            $response->request = new Request();
+            $response->request->accepted = array("no/match");
+            ob_start();
+            $response->redirect("/");
+            $result = ob_get_clean();
+            // echo $result;
+            assert($response->statusCode === 302);
+            assert($response->get("Content-Length") === 0);
+            assert($result === "");
+        });
     });
 
     describe("response.location()", function () {
@@ -293,6 +306,17 @@ describe("php-http/response", function () {
             // echo $result;
             assert($result === "");
         });
+
+        it("should return [1025]", function () {
+            $response = new Response(true);
+            $response->request = new Request();
+            $response->request->method = "GET";
+            ob_start();
+            $response->send(str_pad("", 1025, "x"));
+            $result = ob_get_clean();
+            // echo $result;
+            assert($response->get("Content-Length") === 1025);
+        });
     });
 
     describe("response.json()", function () {
@@ -426,6 +450,81 @@ describe("php-http/response", function () {
             ));
             // echo $result;
             assert($result === "html");
+        });
+    });
+
+    describe("response.attachment()", function () {
+
+        it("should return []", function () {
+            $response = new Response(true);
+            $response->attachment();
+            assert(true);
+        });
+    });
+
+    describe("response.sendfile()", function () {
+
+        it("should return []", function () {
+            $response = new Response(true);
+            $response->sendfile(null);
+            assert(true);
+        });
+    });
+
+    describe("response.download()", function () {
+
+        it("should return []", function () {
+            $response = new Response(true);
+            $response->download(null);
+            assert(true);
+        });
+    });
+
+    describe("response.links()", function () {
+
+        it("should return []", function () {
+            $response = new Response(true);
+            $response->links(null);
+            assert(true);
+        });
+    });
+
+    describe("response.render()", function () {
+
+        it("should return [string]", function () {
+            $response = new Response(true);
+            $response->renderer[".null"] = function ($filename, $data, $callback) {
+                $callback(null, $data);
+            };
+            $result = "";
+            $response->render("file.null", null, function ($err, $data) use (&$result) {
+                $result = "string";
+            });
+            assert($result === "string");
+        });
+
+        it("should return [buffered]", function () {
+            $response = new Response(true);
+            $response->request = new Request();
+            $response->renderer[".null"] = function ($filename, $data, $callback) {
+                $callback(null, "buffered");
+            };
+            ob_start();
+            $response->render("file.null");
+            $result = ob_get_clean();
+            // echo $result;
+            assert($result === "buffered");
+        });
+
+        it("should throw an error", function () {
+            $response = new Response(true);
+            $result = false;
+            try {
+                $response->render("file.null");
+            } catch (Exception $err) {
+                $result = true;
+            }
+            assert($result === true);
         });
     });
 });

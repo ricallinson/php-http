@@ -316,24 +316,21 @@ class Response {
         $key = $req->accepts($keys);
 
         $this->set('Vary', 'Accept');
-// echo "\n\n>> 1 [".$key."](" . count($array) . ")";
+
         if ($key) {
             // use the found type
             $this->set('Content-Type', $key);
             $fn = $array[$key];
             $fn();
-// echo ">> 2";
         } else if ($fn) {
             // use default
             $fn();
-// echo ">> 3";
         } else if (isset($array[$keys[count($keys) - 1]])) {
             // use the last item in the array
             $fn = $array[$keys[count($keys) - 1]];
             $fn();
-// echo ">> 4";
         }
-// echo ">> 5\n\n";
+
         return $this;
     }
 
