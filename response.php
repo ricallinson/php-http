@@ -352,9 +352,11 @@ class Response {
 
     public function render($filename, $data = null, $callback = null) {
 
+        $that = $this;
+
         if (!$callback) {
-            $callback = function ($error, $string) {
-                $this->send($string);
+            $callback = function ($error, $string) use (&$that) {
+                $that->send($string);
             };
         }
 
