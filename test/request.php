@@ -1,5 +1,5 @@
 <?php
-use php_require\request\Request;
+use php_require\php_http\Request;
 
 /*
     First "require()" the file to test.

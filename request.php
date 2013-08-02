@@ -1,5 +1,5 @@
 <?php
-namespace php_require\request;
+namespace php_require\php_http;
 
 class Request {
 

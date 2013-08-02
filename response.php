@@ -1,5 +1,5 @@
 <?php
-namespace php_require\response;
+namespace php_require\php_http;
 
 class Response {
 
@@ -64,9 +64,9 @@ class Response {
     
     private $headersSent = false;
 
-    private $statusCode = 200;
-
     private $headers = array();
+
+    public $statusCode = 200;
 
     public $charset = "utf-8";
 
@@ -91,17 +91,19 @@ class Response {
     }
 
     public function get($field) {
-        if (!isset($this->headers[strtolower($field)])) {
+        $key = strtolower($field);
+        if (!isset($this->headers[$key])) {
             return null;
         }
-        return $this->headers[strtolower($field)];
+        return $this->headers[$key];
     }
 
     public function removeHeader($field) {
-        if (isset($this->headers[strtolower($field)])) {
-            unset($this->headers[strtolower($field)]);
+        $key = strtolower($field);
+        if (isset($this->headers[$key])) {
+            unset($this->headers[$key]);
         }
-        return this;
+        return $this;
     }
 
     public function cookie($name, $value, $options = null) {
