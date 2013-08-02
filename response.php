@@ -166,7 +166,7 @@ class Response {
 
     public function location($url) {
 
-        $app = null;
+        // $app = null;
         $req = $this->request;
 
         // setup redirect map
@@ -183,9 +183,6 @@ class Response {
                 $path = $pathParts[0];
                 $url = $path . substr($url, 2);
             // relative to mount-point
-            } else if ($url[0] !== "/") {
-                // $path = app.path();
-                $url = $path . "/" . substr($url, 1);
             }
         }
 
