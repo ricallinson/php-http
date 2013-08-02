@@ -61,7 +61,9 @@ class Response {
         510 => "Not Extended",               // RFC 2774
         511 => "Network Authentication Required" // RFC 6585
     );
-    
+        
+    private $testing = false;
+
     private $headersSent = false;
 
     private $headers = array();
@@ -76,8 +78,8 @@ class Response {
 
     public $request = null;
 
-    public function __construct() {
-        //
+    public function __construct($testing = false) {
+        $this->testing = $testing;
     }
 
     public function status($code) {
@@ -107,11 +109,17 @@ class Response {
     }
 
     public function cookie($name, $value, $options = null) {
-        setcookie($name, $value, 0);
+        if (!headers_sent()) {
+            setcookie($name, $value, 0);
+        }
+        return $this;
     }
 
     public function clearCookie($name, $options = null) {
-        setcookie($name, "", time() - 3600);
+        if (!headers_sent()) {
+            setcookie($name, "", time() - 3600);
+        }
+        return $this;
     }
 
     public function redirect($url = "", $status = null) {
@@ -148,32 +156,36 @@ class Response {
 
         // Respond
         $this->statusCode = $status;
-        $this->set("Content-Length", count($body));
+        $this->set("Content-Length", strlen($body));
         $this->end($head ? null : $body);
     }
 
+    /*
+        This method needs more work.
+    */
+
     public function location($url) {
-        
+
         $app = null;
         $req = $this->request;
 
         // setup redirect map
-        $map = array("back" => $req->get("Referrer") ? $req->get("Referrer") : "/");
+        // $map = array("back" => $req->get("Referrer") ? $req->get("Referrer") : "/");
 
         // perform redirect
-        $url = isset($map[$url]) ? $map[$url] : $url;
+        // $url = isset($map[$url]) ? $map[$url] : $url;
 
         // relative
-        if (strpos($url, "://") === false && strpos($url, "//") !== 0) {
+        if (strpos($url, "://") === false) {
             // relative to path
-            if ($url[0] === ".") {
-                $path = explode($req->originalUrl("?"));
-                $path = $path[0];
-                $url = $path . ($path[count($path) - 1] === "/" ? "" : "/") . $url;
-                // relative to mount-point
+            if (strpos($url, "./") === 0) {
+                $pathParts = explode("?", $req->originalUrl);
+                $path = $pathParts[0];
+                $url = $path . substr($url, 2);
+            // relative to mount-point
             } else if ($url[0] !== "/") {
                 // $path = app.path();
-                $url = $path . "/" . $url;
+                $url = $path . "/" . substr($url, 1);
             }
         }
 
@@ -188,13 +200,19 @@ class Response {
             throw new \Exception("Cannot call Response.end() more than once.");
         }
 
-        foreach ($this->headers as $field => $value) {
-            header($field . ": " . $value, true);
+        if (!headers_sent()) {
+            foreach ($this->headers as $field => $value) {
+                header($field . ": " . $value, true);
+            }
         }
 
         $this->headersSent = true;
 
         echo($data);
+
+        if ($this->testing) {
+            return;
+        }
 
         exit();
     }

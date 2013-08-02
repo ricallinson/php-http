@@ -87,7 +87,7 @@ class Request {
 
         $this->method = strtoupper($this->getServerVar("REQUEST_METHOD"));
 
-        $this->originalUrl = $this->getServerVar("REQUEST_URI");
+        $this->originalUrl = $this->getServerVar("REQUEST_URI", "/");
 
         $this->accepted = $this->getServerVar("HTTP_ACCEPT");
 
@@ -130,8 +130,8 @@ class Request {
         $this->xhr = $this->get('X-Requested-With') ? 'xmlhttprequest' === $this.get('X-Requested-With').toLowerCase() : false;
     }
 
-    public function getServerVar($key) {
-        return isset($_SERVER[$key]) ? $_SERVER[$key] : null;
+    public function getServerVar($key, $default = null) {
+        return isset($_SERVER[$key]) ? $_SERVER[$key] : $default;
     }
 
     public function cookie($name) {
