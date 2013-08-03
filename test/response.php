@@ -207,6 +207,14 @@ describe("php-http/response", function () {
             $response->location("?query=param");
             assert($response->get("Location") === "/blog?query=param");
         });
+
+        it("should return [/blog?query=param]", function () {
+            $response = new Response();
+            $response->request = new Request();
+            $response->request->originalUrl = "/blog/foo?foo=bar";
+            $response->location("?query=param");
+            assert($response->get("Location") === "/blog/foo?query=param");
+        });
     });
 
     describe("response.end()", function () {

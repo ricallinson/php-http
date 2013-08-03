@@ -176,12 +176,12 @@ class Response {
 
         // relative to path
         if (strpos($url, "://") === false && $url[0] !== "/") {
+            $pathParts = explode("?", $req->originalUrl);
+            $path = $pathParts[0];
             if ($url[0] === ".") {
-                $pathParts = explode("?", $req->originalUrl);
-                $path = $pathParts[0];
                 $url = $this->pathlib->join($path, $url);
             } else {
-                $url = $req->originalUrl . $url;
+                $url = $path . $url;
             }
         }
 
