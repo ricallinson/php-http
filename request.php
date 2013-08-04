@@ -3,6 +3,8 @@ namespace php_require\php_http;
 
 class Request {
 
+    public $config = array();
+
     /**/
 
     public $headers = array();
@@ -184,12 +186,12 @@ class Request {
     public function cfg($name, $value=null) {
         $key = strtolower($name);
         if ($value) {
-            $this->cfg[$key] = $value;
+            $this->config[$key] = $value;
         } else {
-            if (!isset($this->cfg[$key])) {
+            if (!isset($this->config[$key])) {
                 return null;
             }
-            return $this->cfg[$key];
+            return $this->config[$key];
         }
     }
 }
