@@ -162,6 +162,10 @@ class Request {
 
     public function find($name, $array = array(), $default = null) {
         $key = strtolower($name);
+        if (gettype($array) !== "array") {
+            $default = $array;
+            $array = array();
+        }
         if (!isset($array[$key])) {
             return $default;
         }
