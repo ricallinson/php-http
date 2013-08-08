@@ -136,28 +136,36 @@ class Request {
         return isset($_SERVER[$key]) ? $_SERVER[$key] : $default;
     }
 
-    public function cookie($name) {
+    public function cookie($name, $array = array(), $default = null) {
         $key = strtolower($name);
         if (!isset($this->cookies[$key])) {
-            return null;
+            return $this->find($name, $array, $default);
         }
         return $this->cookies[$key];
     }
 
-    public function param($name) {
+    public function param($name, $array = array(), $default = null) {
         $key = strtolower($name);
         if (!isset($this->query[$key])) {
-            return null;
+            return $this->find($name, $array, $default);
         }
         return $this->query[$key];
     }
 
-    public function get($field) {
+    public function get($field, $array = array(), $default = null) {
         $key = strtolower($field);
         if (!isset($this->headers[$key])) {
-            return null;
+            return $this->find($field, $array, $default);
         }
         return $this->headers[$key];
+    }
+
+    public function find($name, $array = array(), $default = null) {
+        $key = strtolower($name);
+        if (!isset($array[$key])) {
+            return $default;
+        }
+        return $array[$key];
     }
 
     public function accepts($types) {
