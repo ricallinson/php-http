@@ -172,4 +172,36 @@ describe("php-http/request", function () {
             assert($request->cfg("FOO") === "bar");
         });
     });
+
+    describe("request.find()", function ()  {
+
+        it("should return [null]", function () {
+            $request = new Request();
+            assert($request->find("foo") === null);
+        });
+
+        it("should return [foo] from array", function () {
+            $request = new Request();
+            $haystack = array("foo" => "foo", "bar" => "bar");
+            assert($request->find("foo", $haystack) === "foo");
+        });
+
+        it("should return [bar] from array", function () {
+            $request = new Request();
+            $haystack = array("foo" => "foo", "bar" => "bar");
+            assert($request->find("bar", $haystack, "def") === "bar");
+        });
+
+        it("should return [def] from default", function () {
+            $request = new Request();
+            $haystack = array("foo" => "foo", "bar" => "bar");
+            assert($request->find("baz", $haystack, "def") === "def");
+        });
+
+        it("should return [def] from default with no array", function () {
+            $request = new Request();
+            $haystack = array("foo" => "foo", "bar" => "bar");
+            assert($request->find("baz", "def") === "def");
+        });
+    });
 });
